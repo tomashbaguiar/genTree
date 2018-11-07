@@ -6,9 +6,16 @@
 //typedef struct node Node;
 struct node {
     int ref;
-    int weight;
+    //int weight;
+    struct edge *edgeList;
     struct node *next;
 };
+
+struct edge {
+    int u;
+    int v;
+    int weight;
+};    
 
 //typedef struct graph Graph;
 struct graph    {
@@ -50,12 +57,45 @@ Graph *createGraph(int vertices)    {
 void printGraph(Graph *g, FILE *file)   {
     for(int i = 0; i < g->vertices; i++)    {
         Node *tmp = g->adjList[i];
-        Node *base = g->adjList[i];
         while(tmp)  {
-            if(tmp->ref != base->ref)
-                fprintf(file, "%d %d %d\n", base->ref, tmp->ref, tmp->weight);
+                fprintf(file, "%d %d %d\n", i, tmp->ref, tmp->weight);
             tmp = tmp->next;
         }
     }
 }
+
+Graph *recvOriginGraph(FILE *file)  {
+    int vertices, edges;
+    fscanf(file, "%d %d\n", &vertices, &edges);
+
+    Graph *g = createGraph(vertices);
+
+    for(int i = 0; i < edges; i++)  {
+        int src, dst, weight;
+        fscanf(file, "%d %d %d\n", &src, &dst, &weight);
+        addEdge(g, src, dst, weight);
+    }
+
+    return g;
+}    
+
+Graph *primAlgorithm(Graph *g)  {
+    Graph *least = createGraph(g->vertices);
+    for(int i = 0; i < g->vertices; i++)    {
+        Node *tmp = g->adjList[i];
+        Node *aux = tmp->next;
+        while(tmp)  {
+            if(aux->weight > tmp->weight)
+                aux = tmp;
+            tmp = tmp->next;
+        }
+        addEdge(least, i, aux->ref, aux->weight);
+    }
+
+    return least;
+}
+
+int existVertex(Graph *g, int ref)    {
+    return (g->adjList[ref] != NULL);
+}    
 

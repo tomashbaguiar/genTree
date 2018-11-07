@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "adjlist.h"
-#include "treatment.h"
 
 int main(int argc, char **argv)
 {
@@ -30,5 +29,11 @@ int main(int argc, char **argv)
     fclose(infile);
     infile = NULL;
 
+    printGraph(primAlgorithm(g), outfile);
 
-    printGraph(g, outfile);
+    if(outfile != stdout)
+        fclose(outfile);
+    
+    return 0;
+}
+

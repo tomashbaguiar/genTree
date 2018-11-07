@@ -6,8 +6,12 @@
 
     Node *addNode(int ref);
     void addEdge(Graph *g, int src, int dst, int weight);
-    void rmEdge(Graph *g, int src, int dst);
+    //void rmEdge(Graph *g, int src, int dst);
     Graph *createGraph(int vertices);
     void printGraph(Graph *g, FILE *file);
+
+    Graph *recvOriginGraph(FILE *file);
+
+    Graph *primAlgorithm(Graph *g);
 
 #endif
