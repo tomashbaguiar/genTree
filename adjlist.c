@@ -4,31 +4,27 @@
   
 #include "adjlist.h"
 
-// A structure to represent a node in adjacency list
-//typedef struct node Node;
+// Estrutura para representar um no na lista de adjacencia
 struct node { 
-    int dst; 
-    int weight; 
-    struct node* next; 
+    int dst;            // Referencia do no. 
+    int weight;         // Peso para o no.
+    struct node* next;  // Proximo no na lista.
 }; 
   
-// A structure to represent an adjacency list 
-//typedef struct adjList AdjList
+// Estrutura para representar a lista de adjacencia
 struct adjList { 
-    struct node* head; // pointer to head node of list 
+    struct node* head;  // Primeiro no da lista.
 }; 
   
-// A structure to represent a graph. A graph is an array of adjacency lists. 
-// Size of array will be V (number of vertices in graph) 
-//typedef struct graph Graph
+// Estrutura para representar o grafo
 struct graph { 
-    int V; 
-    struct adjList* list; 
+    int V;              // Numero de vertices do grafo.
+    struct adjList* list;   // Lista de adjacencias.
 }; 
   
-// A utility function to create a new adjacency list node 
 Node* newAdjListNode(int dst, int weight) 
-{ 
+{
+    // Cria um novo no para uma lista
     Node* newNode = (Node*)malloc(sizeof(Node)); 
     newNode->dst = dst; 
     newNode->weight = weight; 
@@ -36,43 +32,44 @@ Node* newAdjListNode(int dst, int weight)
     return newNode; 
 } 
   
-// A utility function that creates a graph of V vertices 
 Graph* createGraph(int V) 
 { 
+    // Cria um novo grafo com V vertices
     Graph* graph = (Graph*)malloc(sizeof(Graph)); 
     graph->V = V; 
   
-    // Create an array of adjacency lists.  Size of array will be V 
+    // Cria a lista de adjacencias
     graph->list = (AdjList*)malloc(V * sizeof(AdjList)); 
   
-    // Initialize each adjacency list as empty by making head as NULL 
+    // Inicializa cada vertice da lista como nulo
     for (int i = 0; i < V; ++i) 
         graph->list[i].head = NULL; 
   
     return graph; 
 }
   
-// Adds an edge to an undirected graph 
 void addEdge(Graph* graph, int src, int dst, int weight) 
 { 
-    // Add an edge from src to dst.  A new node is added to the adjacency 
-    // list of src.  The node is added at the begining 
+    // Adiciona um novo no ao inicio da adjacencia
     Node* newNode = newAdjListNode(dst, weight); 
     newNode->next = graph->list[src].head; 
     graph->list[src].head = newNode; 
   
-    // Since graph is undirected, add an edge from dst to src also 
+    // Grafo bidirecional
     newNode = newAdjListNode(src, weight); 
     newNode->next = graph->list[dst].head; 
     graph->list[dst].head = newNode; 
 }
 
 Graph *recvOriginGraph(FILE *file)  {
+    // Recebe os valores de vertices e arestas
     int vertices, edges;
     fscanf(file, "%d %d\n", &vertices, &edges);
 
+    // Cria o grafo
     Graph *g = createGraph(vertices);
 
+    // Recebe as arestas do grafo
     for(int i = 0; i < edges; i++)  {
         int src, dst, weight;
         fscanf(file, "%d %d %d\n", &src, &dst, &weight);
@@ -82,21 +79,20 @@ Graph *recvOriginGraph(FILE *file)  {
     return g;
 }  
   
-// Structure to represent a min heap node 
+// Estrutura para representar um no de minHeap
 struct MinHeapNode { 
-    int v; 
-    int key; 
+    int v;          // Referencia.
+    int key;        // Valor.
 }; 
   
-// Structure to represent a min heap 
+// Estrutura para representar um heap minimo
 struct MinHeap { 
-    int size; // Number of heap nodes present currently 
-    int capacity; // Capacity of min heap 
-    int* pos; // This is needed for decreaseKey() 
+    int size;       // Numero de nos do heap.
+    int capacity;   // Capacidade do heap.
+    int* pos;
     struct MinHeapNode** array; 
 }; 
   
-// A utility function to create a new Min Heap Node 
 struct MinHeapNode* newMinHeapNode(int v, int key) 
 { 
     struct MinHeapNode* minHeapNode = (struct MinHeapNode*)malloc(sizeof(struct MinHeapNode)); 
@@ -105,7 +101,6 @@ struct MinHeapNode* newMinHeapNode(int v, int key)
     return minHeapNode; 
 } 
   
-// A utilit function to create a Min Heap 
 struct MinHeap* createMinHeap(int capacity) 
 { 
     struct MinHeap* minHeap = (struct MinHeap*)malloc(sizeof(struct MinHeap)); 
@@ -116,7 +111,6 @@ struct MinHeap* createMinHeap(int capacity)
     return minHeap; 
 } 
   
-// A utility function to swap two nodes of min heap. Needed for min heapify 
 void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b) 
 { 
     struct MinHeapNode* t = *a; 
@@ -124,9 +118,6 @@ void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b)
     *b = t; 
 } 
   
-// A standard function to heapify at given idx 
-// This function also updates position of nodes when they are swapped. 
-// Position is needed for decreaseKey() 
 void minHeapify(struct MinHeap* minHeap, int idx) 
 { 
     int smallest, left, right; 
@@ -145,72 +136,65 @@ void minHeapify(struct MinHeap* minHeap, int idx)
         struct MinHeapNode* smallestNode = minHeap->array[smallest]; 
         struct MinHeapNode* idxNode = minHeap->array[idx]; 
   
-        // Swap positions 
+        // Swap posições 
         minHeap->pos[smallestNode->v] = idx; 
         minHeap->pos[idxNode->v] = smallest; 
   
-        // Swap nodes 
+        // Swap no
         swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[idx]); 
   
         minHeapify(minHeap, smallest); 
     } 
 } 
   
-// A utility function to check if the given minHeap is ampty or not 
 int isEmpty(struct MinHeap* minHeap) 
 { 
     return minHeap->size == 0; 
 } 
   
-// Standard function to extract minimum node from heap 
 struct MinHeapNode* extractMin(struct MinHeap* minHeap) 
 { 
     if (isEmpty(minHeap)) 
         return NULL; 
   
-    // Store the root node 
+    // Guarda o pivot
     struct MinHeapNode* root = minHeap->array[0]; 
   
-    // Replace root node with last node 
+    // Troca o pivot com o ultimo no
     struct MinHeapNode* lastNode = minHeap->array[minHeap->size - 1]; 
     minHeap->array[0] = lastNode; 
   
-    // Update position of last node 
+    // Atualiza a posição do ultimo no
     minHeap->pos[root->v] = minHeap->size - 1; 
     minHeap->pos[lastNode->v] = 0; 
   
-    // Reduce heap size and heapify root 
+    // Reduz o tamanho do heap e o refaz
     --minHeap->size; 
     minHeapify(minHeap, 0); 
   
     return root; 
 } 
   
-// Function to decreasy key value of a given vertex v. This function 
-// uses pos[] of min heap to get the current index of node in min heap 
 void decreaseKey(struct MinHeap* minHeap, int v, int key) 
 { 
-    // Get the index of v in  heap array 
+    // Guarda o indice de v no vetor
     int i = minHeap->pos[v]; 
   
-    // Get the node and update its key value 
+    // Gurada o no e atualiza seu valor
     minHeap->array[i]->key = key; 
   
-    // Travel up while the complete tree is not hepified. 
-    // This is a O(Logn) loop 
+    // Itera enquanto a arvore nao esta em heap
     while (i && minHeap->array[i]->key < minHeap->array[(i - 1) / 2]->key) { 
-        // Swap this node with its parent 
+        // Swap 
         minHeap->pos[minHeap->array[i]->v] = (i - 1) / 2; 
         minHeap->pos[minHeap->array[(i - 1) / 2]->v] = i; 
         swapMinHeapNode(&minHeap->array[i], &minHeap->array[(i - 1) / 2]); 
   
-        // move to parent index 
+        // Move para o indice do pai
         i = (i - 1) / 2; 
     } 
 } 
   
-// A utility function to check if a given vertex 
-// 'v' is in min heap or not 
 int isInMinHeap(struct MinHeap* minHeap, int v) 
 { 
     if (minHeap->pos[v] < minHeap->size) 
@@ -218,9 +202,9 @@ int isInMinHeap(struct MinHeap* minHeap, int v)
     return 0; 
 } 
   
-// A utility function used to print the constructed MST 
 void printArr(Graph *g, int arr[], int n, FILE *file) 
-{ 
+{
+    fprintf(file, "%d %d\n", g->V, (n - 1));
     for (int i = 1; i < n; ++i) {
         Node *src = g->list[arr[i]].head;
         while(src->dst != i)
@@ -229,19 +213,16 @@ void printArr(Graph *g, int arr[], int n, FILE *file)
     }
 } 
   
-// The main function that constructs Minimum Spanning Tree (MST) 
-// using Prim's algorithm 
 void PrimMST(Graph* graph, FILE *file) 
 { 
-    int V = graph->V; // Get the number of vertices in graph 
-    int parent[V]; // Array to store constructed MST 
-    int key[V]; // Key values used to pick minimum weight edge in cut 
+    int V = graph->V;                                   // Numero de vertices no grafo.
+    int parent[V];                                      // Vetor que guarda a arvore minima.
+    int key[V];
   
-    // minHeap represents set E 
+    // minHeap representa o conjunto de arestas
     struct MinHeap* minHeap = createMinHeap(V); 
   
-    // Initialize min heap with all vertices. Key value of 
-    // all vertices (except 0th vertex) is initially infinite 
+    // Inicializa minHeap com todos os vertices.
     for (int v = 1; v < V; ++v) { 
         parent[v] = -1; 
         key[v] = INT_MAX; 
@@ -249,31 +230,26 @@ void PrimMST(Graph* graph, FILE *file)
         minHeap->pos[v] = v; 
     } 
   
-    // Make key value of 0th vertex as 0 so that it 
-    // is extracted first 
+    // Força a extraçao do primeiro no
     key[0] = 0; 
     minHeap->array[0] = newMinHeapNode(0, key[0]); 
     minHeap->pos[0] = 0; 
   
-    // Initially size of min heap is equal to V 
+    // Tamanho inicial de minHeap 
     minHeap->size = V; 
   
-    // In the followin loop, min heap contains all nodes 
-    // not yet added to MST. 
+    // Contem todos os nos fora da arvore
     while (!isEmpty(minHeap)) { 
-        // Extract the vertex with minimum key value 
+        // Extrai o vertice de menor valor
         struct MinHeapNode* minHeapNode = extractMin(minHeap); 
-        int u = minHeapNode->v; // Store the extracted vertex number 
+        int u = minHeapNode->v;                     // Guarda a referencia do no extraido.
   
-        // Traverse through all adjacent vertices of u (the extracted 
-        // vertex) and update their key values 
+        // Procura em todos os vertices adjacentes ao extraido e atualiza seu valores
         Node* pCrawl = graph->list[u].head; 
         while (pCrawl != NULL) { 
             int v = pCrawl->dst; 
   
-            // If v is not yet included in MST and weight of u-v is 
-            // less than key value of v, then update key value and 
-            // parent of v 
+            // Verifica se v esta na arvore e atualiza, se necessario o valor do pai de v
             if (isInMinHeap(minHeap, v) && pCrawl->weight < key[v]) { 
                 key[v] = pCrawl->weight; 
                 parent[v] = u; 
@@ -283,7 +259,7 @@ void PrimMST(Graph* graph, FILE *file)
         } 
     } 
   
-    // print edges of MST 
+    // Escreve no arquivo de saida a arvore minima 
     printArr(graph, parent, V, file); 
 } 
 

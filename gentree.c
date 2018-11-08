@@ -5,6 +5,7 @@
 
 int main(int argc, char **argv)
 {
+    //  Abre o arquivo de entrada
     FILE *outfile = NULL;
     if(argc == 2)
         outfile = stdout;
@@ -19,19 +20,19 @@ int main(int argc, char **argv)
         fprintf(stderr, "Utilização:\n\t./executavel entrada.txt saida.txt\n");
         return 1;
     }
-
     FILE *infile = fopen(argv[1], "r");
     if(infile == NULL)  {
         fprintf(stderr, "Erro ao abrir arquivo de entrada.\n");
         return 1;
     }
+
+    //  Gera o grafo recebido no arquivo de entrada
     Graph *g = recvOriginGraph(infile);
     fclose(infile);
     infile = NULL;
-
-     
+    
+    //  Gera a arvore minima e escreve no arquivo de saida
     PrimMST(g, outfile);
-
     if(outfile != stdout)
         fclose(outfile);
     
