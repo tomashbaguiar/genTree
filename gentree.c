@@ -29,7 +29,8 @@ int main(int argc, char **argv)
     fclose(infile);
     infile = NULL;
 
-    printGraph(primAlgorithm(g), outfile);
+     
+    PrimMST(g, outfile);
 
     if(outfile != stdout)
         fclose(outfile);
